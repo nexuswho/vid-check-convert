@@ -49,7 +49,8 @@ def print_video_info(video_url):
 
 def convert_video(temp_download_path, target_width, target_height, unique_filename):
     # Convert the video to 9/16
-    ffmpeg_command = f'ffmpeg -i {temp_download_path} -vf "scale={target_width}:{target_height},crop={target_width}:{target_height}" static/{unique_filename}'
+    ffmpeg_command = f'ffmpeg -i {temp_download_path} -vf "scale={target_width}:{target_height}:force_original_aspect_ratio=decrease,pad={target_width}:{target_height}:-1:-1:color=black" static/{unique_filename}'
+
     subprocess.run(ffmpeg_command, shell=True)
 
 

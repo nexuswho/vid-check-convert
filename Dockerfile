@@ -32,4 +32,4 @@ RUN mkdir temp
 EXPOSE 5000
 
 # Run app.py when the container launches
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "--timeout", "180", "app:app"]
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "--timeout", "999999", "app:app"]

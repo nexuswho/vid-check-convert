@@ -82,10 +82,14 @@ def convert_video_api():
                     convert_video(
                         temp_download_path, target_width, target_height, unique_filename
                     )
-                    converted_url = f"http://127.0.0.1:5000/static/{unique_filename}"
+                    converted_url = (
+                        f"http://vid-nexuswho.koyeb.app/static/{unique_filename}"
+                    )
                 else:
                     # If no conversion is needed, serve the original video
-                    converted_url = f"http://127.0.0.1:5000/temp/{unique_filename}"
+                    converted_url = (
+                        f"http://vid-nexuswho.koyeb.app/temp/{unique_filename}"
+                    )
 
                 return jsonify(
                     {"converted": True, "success": True, "url": converted_url}

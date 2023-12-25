@@ -1,15 +1,18 @@
-# Ignore compiled Python files
-*.pyc
-__pycache__/
-
 # Ignore the virtual environment
 venv/
+
+# Ignore any local build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Ignore temporary files
+*.swp
+*~
 
 # Ignore the static folder content
 static/
 
 # Ignore the temp folder content
 temp/
-
-
-env/

@@ -19,7 +19,11 @@ RUN cron
 # Install any needed packages specified in requirements.txt
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
 
-RUN apt update && apt install -y curl ffmpeg
+RUN apt update && apt update --fix-missing && apt install -y curl ffmpeg --fix-missing
+
+RUN mkdir static
+
+RUN mkdir temp
 
 # Make port 80 available to the world outside this container
 EXPOSE 5000

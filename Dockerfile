@@ -18,8 +18,11 @@ RUN cron
 
 # Install any needed packages specified in requirements.txt
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
-
+RUN pip install gunicorn
 RUN apt update && apt update --fix-missing && apt install -y curl ffmpeg --fix-missing
+
+
+
 
 RUN mkdir static
 
@@ -29,4 +32,4 @@ RUN mkdir temp
 EXPOSE 5000
 
 # Run app.py when the container launches
-CMD ["python", "app.py"]
+CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "--timeout", "180", "app:app"]

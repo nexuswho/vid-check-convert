@@ -1,0 +1,19 @@
+# Ignore compiled Python files
+*.pyc
+__pycache__/
+
+# Ignore the virtual environment
+venv/
+
+# Ignore the static folder content
+static/
+
+# Ignore the temp folder content
+temp/
+
+# Ignore the Docker-related files
+.dockerignore
+Dockerfile
+docker-compose.yml
+
+env/

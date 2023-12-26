@@ -2,66 +2,32 @@ from flask import Flask, request, jsonify, send_file
 import os
 import subprocess
 import uuid
-import yt_dlp
-import instaloader
 
 app = Flask(__name__)
 
 TEMP_FOLDER = "temp"
 
 
-def download_instagram_video(video_url, output_path):
-    L = instaloader.Instaloader()
-    try:
-        # Load the Instagram post
-        post = instaloader.Post.from_shortcode(L.context, video_url.split("/")[-2])
-
-        # Download the video
-        L.download_post(post, target=output_path)
-        return True
-    except instaloader.exceptions.InstaloaderException as e:
-        print(f"Error downloading Instagram video: {e}")
-    except instaloader.exceptions.PrivateProfileNotFollowedException as e:
-        print(f"Error: Profile is private, and you are not following: {e}")
-    except instaloader.exceptions.QueryReturnedNotFoundException as e:
-        print(f"Error: Instagram post not found: {e}")
-    except Exception as e:
-        print(f"Error: {e}")
-    return False
-
-
 def download_video(video_url, output_path):
-    if "instagram.com" in video_url:
-        return download_instagram_video(video_url, output_path)
-    else:
-        ydl_opts = {
-            "outtmpl": output_path,
-            "no_overwrites": True,
-            "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4",
-            "postprocessors": [
-                {
-                    "key": "FFmpegVideoConvertor",
-                    "preferedformat": "mp4",
-                }
-            ],
-        }
+    ydl_opts = [
+        "yt-dlp",
+        video_url,
+        "--output",
+        output_path,
+        "--no-overwrites",
+        "--format",
+        "bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4",
+        "--postprocessor-args",
+        "-c:v libx264 -preset fast -crf 18 -c:a aac -strict -2",
+    ]
 
-        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-            try:
-                info = ydl.extract_info(video_url, download=False)
-                # Check if the video has a valid duration
-                if (
-                    "duration" in info
-                    and info["duration"] is not None
-                    and info["duration"] > 0
-                ):
-                    ydl.download([video_url])
-                    return True
-                else:
-                    print("Invalid video duration.")
-            except yt_dlp.utils.DownloadError as e:
-                print(f"Error downloading video: {e}")
-        return False
+    try:
+        # Use the system's yt-dlp executable
+        subprocess.run(ydl_opts, check=True)
+        return True
+    except subprocess.CalledProcessError as e:
+        print(f"Error downloading video: {e}")
+    return False
 
 
 def print_video_info(video_url):

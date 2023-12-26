@@ -9,21 +9,16 @@ TEMP_FOLDER = "temp"
 
 
 def download_video(video_url, output_path):
-    ydl_opts = [
-        "yt-dlp",
+    aria2c_opts = [
+        "aria2c",
         video_url,
-        "--output",
+        "--out",
         output_path,
-        "--no-overwrites",
-        "--format",
-        "bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4",
-        "--postprocessor-args",
-        "-c:v libx264 -preset fast -crf 18 -c:a aac -strict -2",
     ]
 
     try:
-        # Use the system's yt-dlp executable
-        subprocess.run(ydl_opts, check=True)
+        # Use aria2c to download the video
+        subprocess.run(aria2c_opts, check=True)
         return True
     except subprocess.CalledProcessError as e:
         print(f"Error downloading video: {e}")

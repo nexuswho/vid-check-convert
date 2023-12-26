@@ -20,7 +20,7 @@ RUN cron
 RUN pip install --trusted-host pypi.python.org -r requirements.txt
 RUN pip install gunicorn
 
-RUN apt update && apt update --fix-missing && apt install -y curl ffmpeg wget --fix-missing
+RUN apt update && apt update --fix-missing && apt install -y curl ffmpeg wget aria2 --fix-missing
 
 RUN wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O /usr/local/bin/yt-dlp && chmod a+rx /usr/local/bin/yt-dlp
 

@@ -8,21 +8,80 @@ app = Flask(__name__)
 TEMP_FOLDER = "temp"
 
 
-def download_video(video_url, output_path):
-    aria2c_opts = [
-        "aria2c",
-        video_url,
-        "--out",
-        output_path,
-    ]
+# def download_video(video_url, output_path):
+#     # Use aria2c to download the video
+#     aria2c_opts = [
+#         "aria2c",
+#         video_url,
+#         "--out",
+#         output_path + ".temp",  # Download with a temporary file extension
+#     ]
 
-    try:
+#     try:
+#         subprocess.run(aria2c_opts, check=True)
+
+#         # Use ffmpeg to convert the downloaded video to the desired output path
+#         ffmpeg_command = f'ffmpeg -i "{output_path}.temp" -c:v libx264 -c:a aac -strict -2 "{output_path}"'
+#         subprocess.run(ffmpeg_command, shell=True, check=True)
+
+#         # Remove the temporary file
+#         os.remove(f"{output_path}.temp")
+
+#         return True
+#     except subprocess.CalledProcessError as e:
+#         print(f"Error downloading or converting video: {e}")
+
+#     # If an error occurred, remove the temporary file if it exists
+#     if os.path.exists(f"{output_path}.temp"):
+#         os.remove(f"{output_path}.temp")
+
+#     return False
+
+import os
+import subprocess
+
+
+def download_video(video_url, output_path):
+    if ".m3u8" in video_url:
+        # Construct FFmpeg command for M3U8 playlist
+        ffmpeg_command = (
+            f'ffmpeg -i "{video_url}" -c copy -bsf:a aac_adtstoasc "{output_path}"'
+        )
+
+        try:
+            subprocess.run(ffmpeg_command, shell=True, check=True)
+            return True
+        except subprocess.CalledProcessError as e:
+            print(f"Error converting M3U8 to MP4: {e}")
+            return False
+    else:
         # Use aria2c to download the video
-        subprocess.run(aria2c_opts, check=True)
-        return True
-    except subprocess.CalledProcessError as e:
-        print(f"Error downloading video: {e}")
-    return False
+        aria2c_opts = [
+            "aria2c",
+            video_url,
+            "--out",
+            output_path + ".temp",  # Download with a temporary file extension
+        ]
+
+        try:
+            subprocess.run(aria2c_opts, check=True)
+
+            # Use ffmpeg to convert the downloaded video to the desired output path
+            ffmpeg_command = f'ffmpeg -i "{output_path}.temp" -c:v libx264 -c:a aac -strict -2 "{output_path}"'
+            subprocess.run(ffmpeg_command, shell=True, check=True)
+
+            # Remove the temporary file
+            os.remove(f"{output_path}.temp")
+
+            return True
+        except subprocess.CalledProcessError as e:
+            print(f"Error downloading or converting video: {e}")
+
+        # If an error occurred, remove the temporary file if it exists
+        if os.path.exists(f"{output_path}.temp"):
+            os.remove(f"{output_path}.temp")
+
+        return False
 
 
 def print_video_info(video_url):

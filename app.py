@@ -1,33 +1,67 @@
-# app.py
 from flask import Flask, request, jsonify, send_file
 import os
 import subprocess
 import uuid
 import yt_dlp
+import instaloader
 
 app = Flask(__name__)
 
 TEMP_FOLDER = "temp"
 
 
-def download_video(video_url, output_path):
-    ydl_opts = {"outtmpl": output_path, "no_overwrites": True}
-    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        try:
-            info = ydl.extract_info(video_url, download=False)
-            # Check if the video has a valid duration
-            if (
-                "duration" in info
-                and info["duration"] is not None
-                and info["duration"] > 0
-            ):
-                ydl.download([video_url])
-                return True
-            else:
-                print("Invalid video duration.")
-        except yt_dlp.utils.DownloadError as e:
-            print(f"Error downloading video: {e}")
+def download_instagram_video(video_url, output_path):
+    L = instaloader.Instaloader()
+    try:
+        # Load the Instagram post
+        post = instaloader.Post.from_shortcode(L.context, video_url.split("/")[-2])
+
+        # Download the video
+        L.download_post(post, target=output_path)
+        return True
+    except instaloader.exceptions.InstaloaderException as e:
+        print(f"Error downloading Instagram video: {e}")
+    except instaloader.exceptions.PrivateProfileNotFollowedException as e:
+        print(f"Error: Profile is private, and you are not following: {e}")
+    except instaloader.exceptions.QueryReturnedNotFoundException as e:
+        print(f"Error: Instagram post not found: {e}")
+    except Exception as e:
+        print(f"Error: {e}")
     return False
+
+
+def download_video(video_url, output_path):
+    if "instagram.com" in video_url:
+        return download_instagram_video(video_url, output_path)
+    else:
+        ydl_opts = {
+            "outtmpl": output_path,
+            "no_overwrites": True,
+            "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/mp4",
+            "postprocessors": [
+                {
+                    "key": "FFmpegVideoConvertor",
+                    "preferedformat": "mp4",
+                }
+            ],
+        }
+
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            try:
+                info = ydl.extract_info(video_url, download=False)
+                # Check if the video has a valid duration
+                if (
+                    "duration" in info
+                    and info["duration"] is not None
+                    and info["duration"] > 0
+                ):
+                    ydl.download([video_url])
+                    return True
+                else:
+                    print("Invalid video duration.")
+            except yt_dlp.utils.DownloadError as e:
+                print(f"Error downloading video: {e}")
+        return False
 
 
 def print_video_info(video_url):
@@ -62,7 +96,7 @@ def convert_video_api():
         # Generate a unique filename using uuid
         unique_filename = str(uuid.uuid4()) + ".mp4"
 
-        # Download the video to the temp folder using yt-dlp
+        # Download the video to the temp folder
         temp_download_path = os.path.join(TEMP_FOLDER, unique_filename)
         if download_video(video_url, temp_download_path):
             # Print video information

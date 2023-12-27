@@ -7,13 +7,25 @@ WORKDIR /app
 # Copy the current directory contents into the container at /app
 COPY . /app
 
-RUN chmod 0644 /app/del.sh
+RUN chmod 755 /app/del.sh
 
-RUN apt update && apt -y install cron
+RUN apt update && apt install curl -y
 
-RUN crontab -l | { cat; echo "*/5 * * * * bash /app/del.sh"; } | crontab -
+# Latest releases available at https://github.com/aptible/supercronic/releases
+ENV SUPERCRONIC_URL=https://github.com/aptible/supercronic/releases/download/v0.2.29/supercronic-linux-amd64 \
+    SUPERCRONIC=supercronic-linux-amd64 \
+    SUPERCRONIC_SHA1SUM=cd48d45c4b10f3f0bfdd3a57d054cd05ac96812b
 
-RUN cron
+RUN curl -fsSLO "$SUPERCRONIC_URL" \
+    && echo "${SUPERCRONIC_SHA1SUM}  ${SUPERCRONIC}" | sha1sum -c - \
+    && chmod +x "$SUPERCRONIC" \
+    && mv "$SUPERCRONIC" "/usr/local/bin/${SUPERCRONIC}" \
+    && ln -s "/usr/local/bin/${SUPERCRONIC}" /usr/local/bin/supercronic
+
+
+
+RUN echo '*/5  *  *  *  * nohup /app/del.sh' >> cronjobs
+
 
 
 # Install any needed packages specified in requirements.txt
@@ -32,5 +44,8 @@ RUN mkdir temp
 # Make port 80 available to the world outside this container
 EXPOSE 5000
 
-# Run app.py when the container launches
-CMD ["gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "--timeout", "999999", "app:app"]
+RUN chmod 755 /app/run.sh
+
+
+CMD ["/app/run.sh"]
+

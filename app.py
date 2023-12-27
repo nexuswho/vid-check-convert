@@ -75,7 +75,10 @@ def download_video(video_url, output_path, start=None, end=None):
 def trim_video(temp_download_path, start, end):
     # Add a standard extension to the temporary trimmed file
     trimmed_temp_file = f"{temp_download_path}.trimmed.mp4"
+    start = "00:00:" + start
+    end = "00:00:" + end
 
+    print(start, "to ", end)
     # Trim the video using FFmpeg
     ffmpeg_command = f'ffmpeg -ss {start} -to {end} -i "{temp_download_path}" -c copy "{trimmed_temp_file}"'
     print(f"FFmpeg command: {ffmpeg_command}")

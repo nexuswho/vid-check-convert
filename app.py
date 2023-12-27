@@ -77,8 +77,8 @@ def trim_video(temp_download_path, start, end):
     trimmed_temp_file = f"{temp_download_path}.trimmed.mp4"
 
     # Trim the video using FFmpeg
-    ffmpeg_command = f'ffmpeg -ss {start} -i "{temp_download_path}" -to {end} -c copy -avoid_negative_ts 1 "{trimmed_temp_file}"'
-
+    ffmpeg_command = f'ffmpeg -ss {start} -to {end} -i "{temp_download_path}" -c copy "{trimmed_temp_file}"'
+    print(f"FFmpeg command: {ffmpeg_command}")
     try:
         result = subprocess.run(
             ffmpeg_command, shell=True, check=True, capture_output=True, text=True

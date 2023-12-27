@@ -189,9 +189,7 @@ def convert_video_api():
                 else:
                     return jsonify({"converted": False, "success": False, "url": None})
 
-                converted_url = (
-                    f"http://vid-nexuswho.koyeb.app/static/{unique_filename}"
-                )
+                converted_url = f"http://vid-sports.koyeb.app/static/{unique_filename}"
             else:
                 # Trim the video if start and end times are provided
                 if start is not None and end is not None:
@@ -200,7 +198,7 @@ def convert_video_api():
                     print("Trimming successful.")
 
                 # If no conversion is needed, serve the original video
-                converted_url = f"http://vid-nexuswho.koyeb.app/temp/{unique_filename}"
+                converted_url = f"http://vid-sports.koyeb.app/temp/{unique_filename}"
 
             return jsonify({"converted": True, "success": True, "url": converted_url})
         else:
